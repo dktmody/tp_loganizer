@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"errors"
 	"math/rand"
 	"os"
 	"time"
@@ -15,13 +16,35 @@ type LogResult struct {
 }
 
 func AnalyzeLog(id, path string) LogResult {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
+	// Correcting os.Stat usage to handle both return values
+	if _, statErr := os.Stat(path); statErr != nil {
+		if os.IsNotExist(statErr) {
+			return LogResult{
+				LogID:       id,
+				FilePath:    path,
+				Status:      "FAILED",
+				Message:     "File not found",
+				ErrorDetail: statErr.Error(),
+			}
+		}
+
+		var pathError *os.PathError
+		if errors.As(statErr, &pathError) {
+			return LogResult{
+				LogID:       id,
+				FilePath:    path,
+				Status:      "FAILED",
+				Message:     "Path error detected",
+				ErrorDetail: pathError.Error(),
+			}
+		}
+
 		return LogResult{
 			LogID:       id,
 			FilePath:    path,
 			Status:      "FAILED",
-			Message:     "File not found",
-			ErrorDetail: err.Error(),
+			Message:     "Unknown error",
+			ErrorDetail: statErr.Error(),
 		}
 	}
 

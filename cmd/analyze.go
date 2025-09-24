@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/dktmody/go_loganizer/internal/analyzer"
 	"github.com/dktmody/go_loganizer/internal/config"
@@ -19,18 +20,18 @@ var analyzeCmd = &cobra.Command{
 	Use:   "analyze",
 	Short: "Analyze log files based on a configuration file",
 	Run: func(cmd *cobra.Command, args []string) {
-		// Load configuration
+		// Charger la configuration
 		configs, err := config.LoadConfig(configPath)
 		if err != nil {
 			fmt.Printf("Failed to load config: %v\n", err)
 			return
 		}
 
-		// Channel to collect results
+		// Canal pour collecter les résultats
 		results := make(chan analyzer.LogResult, len(configs))
 		var wg sync.WaitGroup
 
-		// Analyze logs concurrently
+		// Analyser les logs de manière concurrente
 		for _, logConfig := range configs {
 			wg.Add(1)
 			go func(cfg config.LogConfig) {
@@ -40,17 +41,19 @@ var analyzeCmd = &cobra.Command{
 			}(logConfig)
 		}
 
-		// Wait for all goroutines to finish
+		// Attendre que toutes les goroutines se terminent
 		wg.Wait()
 		close(results)
 
-		// Collect results
+		// Collecter les résultats
 		var report []analyzer.LogResult
 		for result := range results {
 			report = append(report, result)
 		}
 
-		// Export report
+		// Exporter le rapport
+		currentTime := time.Now().Format("2006-01-02_15-04-05")
+		outputPath = fmt.Sprintf("%s_%s", outputPath, currentTime)
 		if err := reporter.ExportReport(report, outputPath); err != nil {
 			fmt.Printf("Failed to export report: %v\n", err)
 			return

@@ -49,12 +49,12 @@ Analyse les fichiers de logs spécifiés dans un fichier de configuration JSON.
 [
   {
     "id": "web-server-1",
-    "path": "test_logs/access.log",
+    "path": "/var/log/nginx/access.log",
     "type": "nginx-access"
   },
   {
     "id": "app-backend-2",
-    "path": "test_logs/errors.log",
+    "path": "/var/log/my_app/errors.log",
     "type": "custom-app"
   }
 ]
@@ -77,7 +77,7 @@ Un fichier `report.json` sera généré avec le format suivant :
 [
   {
     "log_id": "web-server-1",
-    "file_path": "test_logs/access.log",
+    "file_path": "/var/log/nginx/access.log",
     "status": "OK",
     "message": "Analyse terminée avec succès.",
     "error_details": ""
@@ -92,21 +92,27 @@ Un fichier `report.json` sera généré avec le format suivant :
 ]
 ```
 
-## Tests
+### Fonctionnalités Bonus
 
-1. **Vérifiez la compilation :**
+#### Création automatique des répertoires
+
+Pour tester cette fonctionnalité :
+
+1. Spécifiez un chemin de sortie dans un répertoire inexistant, par exemple :
    ```bash
-   go build
+   go run main.go analyze --config config.json --output new_dir/report.json
    ```
-2. **Exécutez les tests unitaires :**
+2. Vérifiez que le répertoire `new_dir` est automatiquement créé et que le fichier `report.json` y est généré.
+
+#### Ajout d'un horodatage dans les noms des fichiers de sortie
+
+Pour tester cette fonctionnalité :
+
+1. Exécutez la commande avec un chemin de sortie standard :
    ```bash
-   go test ./...
+   go run main.go analyze --config config.json --output report.json
    ```
-
-## Fonctionnalités Bonus
-
-- Création automatique des répertoires pour les fichiers d'export.
-- Ajout d'un horodatage dans les noms des fichiers de sortie.
+2. Vérifiez que le fichier généré contient un horodatage dans son nom, par exemple : `report_2025-09-24_15-30-00.json`.
 
 ---
 
