@@ -1,2 +1,4 @@
 .DS_Store
 .idea/
+# Ignorer les fichiers binaires générés
+*.exe
