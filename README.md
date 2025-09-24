@@ -116,4 +116,3 @@ Pour tester cette fonctionnalité :
 
 ---
 
-Bon courage et bonne analyse de logs !
