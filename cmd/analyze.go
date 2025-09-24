@@ -14,6 +14,7 @@ import (
 
 var configPath string
 var outputPath string
+var statusFilter string
 
 // analyzeCmd represents the analyze command
 var analyzeCmd = &cobra.Command{
@@ -51,9 +52,20 @@ var analyzeCmd = &cobra.Command{
 			report = append(report, result)
 		}
 
+		// Filtrer les résultats par statut si le drapeau --status est utilisé
+		if statusFilter != "" {
+			var filteredReport []analyzer.LogResult
+			for _, result := range report {
+				if result.Status == statusFilter {
+					filteredReport = append(filteredReport, result)
+				}
+			}
+			report = filteredReport
+		}
+
 		// Exporter le rapport
-		currentTime := time.Now().Format("2006-01-02_15-04-05")
-		outputPath = fmt.Sprintf("%s_%s", outputPath, currentTime)
+		currentDate := time.Now().Format("060102")
+		outputPath = fmt.Sprintf("%s_%s", currentDate, outputPath)
 		if err := reporter.ExportReport(report, outputPath); err != nil {
 			fmt.Printf("Failed to export report: %v\n", err)
 			return
@@ -67,6 +79,7 @@ func init() {
 	rootCmd.AddCommand(analyzeCmd)
 	analyzeCmd.Flags().StringVarP(&configPath, "config", "c", "", "Path to the configuration file")
 	analyzeCmd.Flags().StringVarP(&outputPath, "output", "o", "", "Path to the output report file")
+	analyzeCmd.Flags().StringVarP(&statusFilter, "status", "s", "", "Status to filter results by")
 	analyzeCmd.MarkFlagRequired("config")
 	analyzeCmd.MarkFlagRequired("output")
 }
